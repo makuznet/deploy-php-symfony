@@ -90,7 +90,7 @@ This repo was inspired by [rebrainme.com](https://rebrainme.com) team
 - [PHP](https://www.php.net/)
 - [Composer](https://getcomposer.org)
 - [Symfony Demo Application](https://github.com/symfony/demo)
-- []()
+- [Nginx 1.4.x on Unix systems](https://www.php.net/manual/en/install.unix.nginx.php)
 
 ## License
 Follow all involved parties licenses terms and conditions.
