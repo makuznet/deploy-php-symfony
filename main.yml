@@ -1,0 +1,6 @@
+---
+- name: installing nginx with two virtual hosts
+  hosts: web
+  roles:
+    - role: nginx
+      tags: create_nginx

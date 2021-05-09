@@ -1,87 +1,124 @@
-# Postgresql migration PHP
+# Installing and running Symfony demo
 
-> This repo creates Postgresql migration with PHP.   
-
-Composer - Dependency Manager for PHP.
-The main file — `composer.json`.
- gem file for Ruby
-requirements.txt for Jango
-packages.json for Node.js
-pom.xml for Java
+> This repo is about installing and running Symfony demo.    
 
 ## Usage 
-### Run Composer
+### To run Symfony demo
+[https://makuznet-at-gmail-com-sym-demo-php.devops.rebrain.srwx.net/](https://makuznet-at-gmail-com-sym-demo-php.devops.rebrain.srwx.net/)
+
+### To get connected via ssh
+Use `REBRAIN.SSH.PUB.KEY` to get connected.
 ```bash
-composer
-```
-### Run builtin Composer web server
-```bash
-./bin/console server:run
-```
-### Creating an ssh tunnel to get remotely run Composer web server locally 
-```bash
-ssh remote.host.ip.addr -l root -L 8000:127.0.0.1:8000
-```
-### Run Symfony demo project
-Insert in your web browser
-```bash
-http://localhost:8000
+ssh makuznet-at-gmail-com-sym-demo-php.devops.rebrain.srwx.net -l root
 ```
 
 ## Installation
-#### Composer for Linux (from video: v1.7.3)
-- [Download Composer](https://getcomposer.org/download)
-
-### Symfony demo (video: v1.2.7)
-The "Symfony Demo Application" is a reference application created to show how to develop applications following the Symfony Best Practices.
-
-- [Symfony Demo Application](https://github.com/symfony/demo)
-
+### Terraform
+This is to roll out a VPS in Digital Ocean with DNS in Amazon.
+See `main.tf` file for details.
 ```bash
-cd /var/www
-composer create-project symfony/symfony-demo demo
+terraform init
+terraform plan
+terraform apply --auto-approve
 ```
-demo — /var/www/demo — dir where all the files will be copied to
 
-If a Symfony-demo dir was just copied from GitHub it's worth to run
+### PHP
 ```bash
-cd demo
+sudo apt update
+sudo apt install -y php php-fpm php-sqlite3 php-mysql php-mbstring php-dom
+```
+
+### Composer
+```bash
+php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+php -r "if (hash_file('sha384', 'composer-setup.php') === '756890a4488ce9024fc62c56153228907f1545c228516cbf63f885e036d37e9a59d27d63f46af1d4d07ee0f76181c7d3') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
+php composer-setup.php
+php -r "unlink('composer-setup.php');"
+sudo mv composer.phar /usr/local/bin/composer
+composer
+```
+
+### NGINX
+```bash
+sudo apt install -y nginx
+```
+
+### Symfony demo app
+The "Symfony Demo Application" is a reference application created to show how to develop applications following the Symfony Best Practices.
+```bash
+sudo apt install -y zip
+cd /var/www/
+sudo composer create-project symfony/symfony-demo sym-demo
+cd sym-demo
+```
+sym-demo — /var/www/sym-demo — dir where all the files will be copied to.  
+
+If a Symfony-demo dir was just copied from GitHub it's worth to run:  
+```bash
+cd sym-demo
 composer install
 ```
-and Composer will install everything wha is needed.
+and Composer will install everything what is needed.
 
-There is `.env` configuration file where next settings are located:
-- APP_ENV=dev
-- APP_DEBUG=1
-- APP_SECRET=67d829bf61dc5f87a73fd814e2c9f629
-- DATABASE_URL=sqlite:///%kernel.projects_dir%/data/database.sqlite
-- MAILER_URL=null://localhost
+### MySQL
+```bash
+sudo apt install -y gnupg
+cd /tmp
+wget https://dev.mysql.com/get/mysql-apt-config_0.8.17-1_all.deb
+sudo dpkg -i mysql-apt-config* # choose mysql 7.5 cluster
+sudo apt update
+sudo apt install -y mysql-server
+```
 
 ### Changing database sqlite to mysql
 Composer will generate tables automagically.
 ```bash
-apt install mysql-server
-mysql
+
+sudo mysql
     create database symfony;
-    create user 'symfony'@'%' identified by '123456';
+    create user 'symfony'@'%' identified by 'netlab';
     grant all privileges on symfony.* to 'symfony'@'%';
     \q
-vi /var/www/demo/.env
-    DATABASE_URL=mysql://symfony:123456@127.0.0.1:3306/symfony
-mysql
-    user symfony;
-    show tables;
-    \q
-apt install php7.2-mysql    
-./bin/console doctrine:schema:create    
 
+sudo vi /var/www/sym-demo/.env
+    DATABASE_URL=mysql://symfony:netlab@127.0.0.1:3306/symfony
+
+sudo mysql
+    use symfony; # connecting to the database
+    show tables; # supposed to be empty
+    \q 
+
+cd /var/www/sym-demo/   
+
+sudo ./bin/console doctrine:schema:create  # creating a DB structure from code  
 ```
 #### Download test data
 ```bash
-/bin/console doctrine:fixtures:load
+sudo ./bin/console doctrine:fixtures:load # loading test data to the DB from code
+
 mysql
+    use symfony; # connecting to the database
     select * from symfony_demo_post; # make sure test data has been uploaded to the table
+    \q
 ```
+
+### Letsencrypt
+```bash
+sudo apt install letsencrypt
+
+# getting an ssl certificate
+letsencrypt certonly --webroot -w /var/www/html -d makuznet-at-gmail-com-sym-demo-php.devops.rebrain.srwx.net -m makuznet@gmail.com --agree-tos
+
+# backing up /etc/letsencrypt
+scp -r root@makuznet-at-gmail-com-sym-demo-php.devops.rebrain.srwx.net:/etc/letsencrypt ~/Documents/rebrain/db_migration_php/
+```
+
+### Configuring NGINX
+Run Ansible to copy NGINX configuration files and remove a default symlink.
+```bash
+ansible-playbook -i inventory.yml main.yml
+```
+
 ## Acknowledgments
 
 This repo was inspired by [rebrainme.com](https://rebrainme.com) team
@@ -90,7 +127,11 @@ This repo was inspired by [rebrainme.com](https://rebrainme.com) team
 - [PHP](https://www.php.net/)
 - [Composer](https://getcomposer.org)
 - [Symfony Demo Application](https://github.com/symfony/demo)
+- [Symfony Configuring a Web Server](https://symfony.com/doc/current/setup/web_server_configuration.html#nginx)
 - [Nginx 1.4.x on Unix systems](https://www.php.net/manual/en/install.unix.nginx.php)
+- [Packagist — package list](https://packagist.org)
+- [Composer cheat sheet in Russian](https://phpprofi.ru/blogs/post/52)
+- [MySQL Community Downloads](https://dev.mysql.com/downloads/file/?id=504286)
 
 ## License
 Follow all involved parties licenses terms and conditions.

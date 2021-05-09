@@ -1,0 +1,11 @@
+---
+- name: enable_n_autostart_nginx
+  service:
+    name: nginx
+    state: started
+    enabled: yes
+
+- name: reload_nginx
+  service:
+    name: nginx
+    state: reloaded
