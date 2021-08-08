@@ -17,6 +17,7 @@ ssh makuznet-at-gmail-com-sym-demo-php.devops.rebrain.srwx.net -l root
 This is to roll out a VPS in Digital Ocean with DNS in Amazon.
 See `main.tf` file for details.
 ```bash
+cd terraform-do
 terraform init
 terraform plan
 terraform apply --auto-approve
@@ -105,18 +106,20 @@ mysql
 ### Letsencrypt
 ```bash
 sudo apt install letsencrypt
-
-# getting an ssl certificate
+```
+#### getting an ssl certificate
+```shell
 letsencrypt certonly --webroot -w /var/www/html -d makuznet-at-gmail-com-sym-demo-php.devops.rebrain.srwx.net -m makuznet@gmail.com --agree-tos
-
-# backing up /etc/letsencrypt
+```
+#### backing up /etc/letsencrypt
+```shell
 scp -r root@makuznet-at-gmail-com-sym-demo-php.devops.rebrain.srwx.net:/etc/letsencrypt ~/Documents/rebrain/db_migration_php/
 ```
 
 ### Configuring NGINX
 Run Ansible to copy NGINX configuration files and remove a default symlink.
 ```bash
-ansible-playbook -i inventory.yml main.yml
+ansible-playbook -i terraform-do/inventory.yml playbooks/main.yml
 ```
 
 ## Acknowledgments
