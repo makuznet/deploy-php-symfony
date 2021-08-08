@@ -6,12 +6,6 @@
 ### To run Symfony demo
 [https://makuznet-at-gmail-com-sym-demo-php.devops.rebrain.srwx.net/](https://makuznet-at-gmail-com-sym-demo-php.devops.rebrain.srwx.net/)
 
-### To get connected via ssh
-Use `REBRAIN.SSH.PUB.KEY` to get connected.
-```bash
-ssh makuznet-at-gmail-com-sym-demo-php.devops.rebrain.srwx.net -l root
-```
-
 ## Installation
 ### Terraform
 This is to roll out a VPS in Digital Ocean with DNS in Amazon.
